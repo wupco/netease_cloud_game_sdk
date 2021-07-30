@@ -63,6 +63,9 @@ def decode_mess(message):
         fbyte = mess[0]
         sbyte = mess[1]
         for j in range(0, 256):
+            if(chr((fbyte-j)%256)=="[" and chr((sbyte-j)%256) == "{" and chr((mess[2]-j)%256) == "\""):
+                sub_key = j
+                break
             if chr((fbyte-j)%256) == "{" and chr((sbyte-j)%256) == "\"":
                 sub_key = j
                 break
@@ -96,7 +99,19 @@ def request_ticket(token, game_code, regions=["hdcz","hbsjz"], codecs = ["h264",
     }
     info = requests.post("https://n.cg.163.com/api/v2/tickets", headers=headers, data= req_str).text
     info_obj = json.loads(decode_mess(info))
+    print(info_obj)
     return info_obj["gateway_url"]
+
+def find_region(token, game_code):
+    headers = {
+        "Authorization": "Bearer " +token
+    }
+    res = decode_mess(requests.get("https://n.cg.163.com/api/v2/media-servers?game_code="+game_code, headers=headers).text)
+    r = json.loads(res)
+    regions = []
+    for obj in r:
+        regions.append(obj["region"])
+    return regions
 
 def exit_game(token):
     headers = {
@@ -106,7 +121,8 @@ def exit_game(token):
 
 async def connect(token, game_code, w=1280, h=720, quality="high", codecs=["h264","vp8","vp9"], platform=0, fps="30"):
         user_id = get_basic_info(token)
-        uri = request_ticket(token, game_code)
+        regions = find_region(token, game_code)
+        uri = request_ticket(token, game_code, regions=regions)
         websocket = await websockets.connect(uri)
         auth_obj = { 
             "id": str(int(round(time.time() * 1000))),
@@ -156,6 +172,7 @@ async def test(game_code):
     if token == "":
         print("login first!")
         exit(-1)
+    
     res, sock = await connect(token, game_code)
     obj = object_from_string(res)
     recorder = MediaRecorder("./a.mp4")
@@ -187,6 +204,7 @@ async def test(game_code):
         try:
             a = await pc.getReceivers()[1].track.recv()
         except:
+            await sock.send(answer_mess)
             print("err")
             continue
         print("---------input---------")
@@ -199,7 +217,6 @@ async def test(game_code):
             action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"3 640 675 0"}}
             await send_action(sock, action)
             
-
         a.to_image().save("./a.png")
     await recorder.stop() 
 
