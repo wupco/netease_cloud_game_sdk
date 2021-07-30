@@ -4,4 +4,19 @@ Operating on a virtual environment (windows/android) remotely (https://cg.163.co
 
 Demo: arknights
 
+```python
+game_code = "mrfz"
+asyncio.get_event_loop().run_until_complete(test(game_code))
+```
+
 ![demo](demo.jpg)
+
+Demo2: 崩3
+
+```python
+game_code = "bh3"
+asyncio.get_event_loop().run_until_complete(test(game_code))
+```
+
+![demo2](demo2.png)
+
