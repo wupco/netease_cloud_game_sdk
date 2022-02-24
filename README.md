@@ -2,6 +2,16 @@
 
 Operating on a virtual environment (windows/android) remotely (https://cg.163.com/#/)
 
+## requirements
+
+```
+aiortc
+websockets
+requests
+Pillow
+```
+
+## Demos
 Demo: arknights
 
 ```python
