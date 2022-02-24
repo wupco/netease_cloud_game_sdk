@@ -7,6 +7,11 @@ Demo: arknights
 ```python
 game_code = "mrfz"
 asyncio.get_event_loop().run_until_complete(test(game_code))
+
+
+```
+```bash
+python3 ark-demo.py
 ```
 
 ![demo](demo.jpg)
