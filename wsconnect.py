@@ -9,7 +9,6 @@ from aiortc.contrib.signaling import object_from_string, object_to_string
 from aiortc import RTCIceCandidate, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.signaling import BYE, add_signaling_arguments, create_signaling
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder, MediaRelay
-import cv2
 
 relay = MediaRelay()
 sub_key = None
@@ -167,12 +166,27 @@ async def send_action(sock, action):
     pong_waiter = await sock.ping()
     await pong_waiter
 
+def pack_message(cmd, data):
+    if cmd == "mm": # move mouse, data: x, y
+        action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"1 %d %d 0" % (data["x"], data["y"])}}
+    elif cmd == "cm": # click mouse, data: x, y
+        action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"3 %d %d 1" % (data["x"], data["y"])}}
+    elif cmd == "ip": # keyboard input, data: single keyborad word
+        action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"5 %s" % data["word"]}}
+    else:
+        action = {}
+    return action
+
 async def test(game_code):
     token = open("token").read().strip()
     if token == "":
         print("login first!")
-        exit(-1)
-    
+        pnum = input("input your phone number: ")
+        login("86-"+pnum.strip())
+        token = open("token").read().strip()
+        if token == "":
+            print("something wrong when login")
+            exit(-1)
     res, sock = await connect(token, game_code)
     obj = object_from_string(res)
     recorder = MediaRecorder("./a.mp4")
@@ -209,14 +223,28 @@ async def test(game_code):
             continue
         print("---------input---------")
         b = input()
-        if b.strip() == "s":
-            # 1=>move (640,675)
-            action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"1 640 675 0"}}
+        if b.strip() == "init":
+            # 1=>move (638,627)
+            action = pack_message("mm", {"x":638, "y":627})
             await send_action(sock, action)
-            # 3=>click (640,675)
-            action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"3 640 675 0"}}
+            # 3=>click (638,627)
+            action = pack_message("cm", {"x":638, "y":627})
             await send_action(sock, action)
-            
+        if b.strip() == "click start game":
+            #action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"1 571 528 0"}}
+            action = pack_message("mm", {"x":571, "y":528})
+            await send_action(sock, action)
+            #action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"3 571 528 0"}}
+            action = pack_message("cm", {"x":571, "y":528})
+            await send_action(sock, action)
+        if b.strip() == "input abc":
+            action = pack_message("ip", {"word":"a"})
+            await send_action(sock, action)
+            action = pack_message("ip", {"word":"b"})
+            await send_action(sock, action)
+            action = pack_message("ip", {"word":"c"})
+            await send_action(sock, action)
+        
         a.to_image().save("./a.png")
     await recorder.stop() 
 
