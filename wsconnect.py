@@ -161,6 +161,7 @@ def channel_log(channel, t, message):
     print("channel(%s) %s %s" % (channel.label, t, message))
 
 async def send_action(sock, action):
+
     action = encode_mess(json.dumps(action).replace("'","\""))
     await sock.send(action)
     pong_waiter = await sock.ping()
@@ -170,10 +171,11 @@ def pack_message(cmd, data):
     if cmd == "mm": # move mouse, data: x, y
         action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"1 %d %d 0" % (data["x"], data["y"])}}
     elif cmd == "cm": # click mouse, data: x, y
-        action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"3 %d %d 1" % (data["x"], data["y"])}}
+        action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"3 %d %d 0" % (data["x"], data["y"])}}
     elif cmd == "ip": # keyboard input, data: single keyborad word
         action = {"id":str(int(round(time.time() * 1000))),"op":"input","data":{"cmd":"5 %s" % data["word"]}}
     else:
         action = {}
     return action
 
+#print(decode_mess("2YDHwoCYgI+VlI6SlpeTk4+Uj5eAioDNzoCYgMfMztPSgIqAwr/Sv4CY2YDBy8KAmICRfpaOln6TkZB+joDb2w=="))
