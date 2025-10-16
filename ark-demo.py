@@ -181,6 +181,7 @@ async def test(game_code: str):
         while True:
             cmd = input("> ").strip().lower()
             if cmd == "quit":
+                exit_game(token, game_code)
                 break
             elif cmd == "init":
                 # move mouse to select 默认语音

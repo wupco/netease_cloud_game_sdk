@@ -112,11 +112,11 @@ def find_region(token, game_code):
         regions.append(obj["region"])
     return regions
 
-def exit_game(token):
+def exit_game(token, game_code):
     headers = {
         "Authorization": "Bearer " +token
     }
-    print(requests.get("https://n.cg.163.com/api/v2/customize-settings/exitgame_room_recommend/time", headers=headers).text)
+    print(requests.delete("https://n.cg.163.com/api/v2/users/@me/games-playing/{game_code}", headers=headers).text)
 
 async def connect(token, game_code, w=1280, h=720, quality="high", codecs=["h264","vp8","vp9"], platform=0, fps="30"):
         user_id = get_basic_info(token)
