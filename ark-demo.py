@@ -4,6 +4,7 @@ import time
 import sys
 import os
 import platform
+import logging
 from typing import Optional
 from aiortc import RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaRecorder, MediaRelay
@@ -11,6 +12,7 @@ from wsconnect import (
     connect, object_from_string, encode_mess, decode_mess,
     pack_message, send_action, login, exit_game
 )
+logging.getLogger("av").setLevel(logging.WARNING)
 
 GAME_CODE = "mrfz"
 TOKEN_FILE = "token"
@@ -181,6 +183,7 @@ async def test(game_code: str):
         while True:
             cmd = input("> ").strip().lower()
             if cmd == "quit":
+                exit_game(token, game_code)
                 break
             elif cmd == "init":
                 # move mouse to select 默认语音
